@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pv-shade-fingerprint"
+version = "0.1.0"
+description = "Find, map and cost the shading of a PV system from its production data alone: residuals projected onto the sun's path, an obstruction silhouette and the annual energy it costs."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+dependencies = [
+    "numpy>=1.26",
+    "pandas>=2.1",
+    "pyarrow>=14",
+    "scipy>=1.11",
+    "pvlib>=0.11",
+    "matplotlib>=3.8",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8"]
+
+[project.scripts]
+pv-shade = "pv_shade.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+filterwarnings = ["ignore:The 'generic' unit for NumPy timedelta:DeprecationWarning"]

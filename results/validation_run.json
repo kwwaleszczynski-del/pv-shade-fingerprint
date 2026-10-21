@@ -1,0 +1,40 @@
+{
+  "scenarios": [
+    "none",
+    "tree",
+    "building",
+    "row",
+    "row-dense",
+    "pole",
+    "building+pole"
+  ],
+  "seeds": [
+    1,
+    2,
+    3,
+    4,
+    5
+  ],
+  "years": [
+    "2021-01-01",
+    "2023-01-01"
+  ],
+  "config": {
+    "az_step": 2.0,
+    "el_step": 2.0,
+    "pool": 1,
+    "min_elevation": 3.0,
+    "max_aoi": 80.0,
+    "quantile": 0.75,
+    "depth": 0.1,
+    "min_days": 3,
+    "min_patch": 3,
+    "clear_level": 0.9,
+    "clear_rough": 0.03,
+    "clip": 0.97,
+    "iterations": 3,
+    "k_cloud": 0.3,
+    "shift_minutes": null
+  },
+  "runtime_seconds": 344.4
+}

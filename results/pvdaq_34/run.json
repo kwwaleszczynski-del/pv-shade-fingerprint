@@ -1,0 +1,48 @@
+{
+  "system": 34,
+  "name": "PVDAQ system 34",
+  "period": [
+    "2016-01-01",
+    "2017-12-31"
+  ],
+  "files": 731,
+  "missing_ac_share": 0.0302,
+  "clock_offset_minutes": -1.15,
+  "clear_days": 404,
+  "shaded_cells": 47,
+  "silhouette_columns": 16,
+  "estimated_loss_pct": 0.158,
+  "per_year": {
+    "2016": {
+      "clear_days": 188,
+      "shaded_cells": 46,
+      "estimated_loss_pct": 0.166,
+      "clock_offset_minutes": -1.45
+    },
+    "2017": {
+      "clear_days": 215,
+      "shaded_cells": 49,
+      "estimated_loss_pct": 0.157,
+      "clock_offset_minutes": -0.84
+    }
+  },
+  "year_to_year": {
+    "mask_iou": 0.722,
+    "silhouette_rms_difference_deg": 1.51,
+    "common_columns": 16
+  },
+  "row_fit": {
+    "points": 16,
+    "critical_angle_deg": 21.028,
+    "row_azimuth_deg": 182.626,
+    "rmse_deg": 0.959,
+    "gcr": 0.673,
+    "azimuth_span_deg": 122.0
+  },
+  "sensor_check": {
+    "power_over_sensor_in_mask": -0.495,
+    "power_over_sensor_outside_low_sun": -0.095,
+    "power_over_model_in_mask": -0.25
+  },
+  "runtime_seconds": 42.9
+}

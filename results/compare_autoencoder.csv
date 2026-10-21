@@ -1,0 +1,3 @@
+situation,seed,ae_shaded_steps_flagged,ae_alarm_steps,ae_alarms_in_shade,ae_alarms_in_events,ae_alarms_other,ae_events_flagged,ae_sun_space_iou,fp_iou,fp_horizon_rmse_deg,fp_true_loss_pct,fp_estimated_loss_pct
+always,1,0.0,413,0.0775,0.5908,0.3317,6/7,0.0,0.916,1.4037,3.428,2.7134
+appears,1,0.5444,1599,0.2489,0.1782,0.5729,7/7,0.1779,0.916,1.4037,3.428,2.7134
