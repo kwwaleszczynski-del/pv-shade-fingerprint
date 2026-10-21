@@ -63,20 +63,24 @@ bands that wander with the seasons; in sun space it becomes a silhouette, while 
 The only input is AC power with timestamps, plus the system's location, orientation and nameplate. Four steps:
 
 **1. Expected clear-sky power.** Ineichen clear sky with the Linke turbidity climatology, Perez transposition and an
-ASHRAE incidence-angle loss give the effective irradiance in the module plane, split into beam $B$ and diffuse $D$:
+ASHRAE incidence-angle loss give the effective irradiance in the module plane, split into beam $`B`$ and diffuse $`D`$:
 
-$$E(t) = B_{cs}(t)\,\mathrm{IAM}(\theta) + D_{cs}(t)$$
+```math
+E(t) = B_{cs}(t)\,\mathrm{IAM}(\theta) + D_{cs}(t)
+```
 
 An efficiency curve with six coefficients turns it into power, and one scale per day absorbs whatever moves a whole
 day up or down (soiling, turbidity, slow degradation):
 
-$$P_{cs}(t) = E\left(c_0 + c_1\frac{E}{1000} + c_2\ln\frac{E}{1000} + c_3\,\tau(t) + c_4\frac{D_{cs}}{E} + c_5\frac{B_{cs}(1/\cos\theta - 1)}{E}\right), \qquad P_{exp}(t) = s_d\,P_{cs}(t)$$
+```math
+P_{cs}(t) = E\left(c_0 + c_1\frac{E}{1000} + c_2\ln\frac{E}{1000} + c_3\,\tau(t) + c_4\frac{D_{cs}}{E} + c_5\frac{B_{cs}(1/\cos\theta - 1)}{E}\right), \qquad P_{exp}(t) = s_d\,P_{cs}(t)
+```
 
-$c_1, c_2$ cover part-load and low-light behaviour and module heating, $\tau(t) = \cos(2\pi(h_{solar} - 15)/24)$ the
-afternoon peak of the air temperature, $c_4$ and $c_5$ errors of the diffuse model and of the incidence-angle loss.
+$`c_1, c_2`$ cover part-load and low-light behaviour and module heating, $`\tau(t) = \cos(2\pi(h_{solar} - 15)/24)`$ the
+afternoon peak of the air temperature, $`c_4`$ and $`c_5`$ errors of the diffuse model and of the incidence-angle loss.
 None of them can follow a feature that sits at one azimuth. The coefficients are fitted by **Huber regression**
 (iteratively reweighted least squares, scale from the MAD) on clear days only, and only outside the current shade
-estimate. The day scale is the upper quartile of $P / P_{cs}$ over the day's steps with the sun above 10°, so a
+estimate. The day scale is the upper quartile of $`P / P_{cs}`$ over the day's steps with the sun above 10°, so a
 shadow over part of the day does not pull it down.
 
 **Clear days from production alone.** A day is clear when its clearness index (the day scale relative to the
@@ -92,45 +96,51 @@ that minimises the median absolute clear-day residual: the one that makes mornin
 **2. Residuals in sun space.** On clear days, for every step with the sun above 3° and less than 80° off the module
 normal (no beam to shade otherwise) and below the inverter limit,
 
-$$r(t) = \frac{P(t)}{P_{exp}(t)} - 1$$
+```math
+r(t) = \frac{P(t)}{P_{exp}(t)} - 1
+```
 
 is binned on a 2° × 2° grid of solar azimuth and elevation. Each cell keeps the number of distinct days, the median
-and the **upper quartile $q_{75}$** of its residuals, pooled with the cells directly above and below (elevation only,
+and the **upper quartile $`q_{75}`$** of its residuals, pooled with the cells directly above and below (elevation only,
 so azimuth keeps its full resolution). A cloud that slipped through the clear-day filter pulls single samples down;
-$q_{75}$ ignores it unless it happens on more than a quarter of the visits.
+$`q_{75}`$ ignores it unless it happens on more than a quarter of the visits.
 
-**3. Shade mask.** A cell is shaded when even its better visits fall short, $q_{75} < -0.10$, and it was seen on at
+**3. Shade mask.** A cell is shaded when even its better visits fall short, $`q_{75} < -0.10`$, and it was seen on at
 least 3 clear days; patches smaller than 3 cells are dropped. Steps 1-4 are iterated three times: the mask and
 everything below the silhouette are left out of the next calibration and day scales, so the shade does not bend
 the expected-power model.
 
-**4. Silhouette and loss.** For each 2° azimuth column, the obstruction's height $h$ is a **decision stump** on the
-column's samples (elevation $e_i$, residual $r_i$): with $s_i = [r_i < -0.05]$,
+**4. Silhouette and loss.** For each 2° azimuth column, the obstruction's height $`h`$ is a **decision stump** on the
+column's samples (elevation $`e_i`$, residual $`r_i`$): with $`s_i = [r_i < -0.05]`$,
 
-$$h = \arg\min_h \;\#\{i: e_i < h,\ \neg s_i\} + \#\{i: e_i \ge h,\ s_i\}$$
+```math
+h = \arg\min_h \;\#\{i: e_i < h,\ \neg s_i\} + \#\{i: e_i \ge h,\ s_i\}
+```
 
 searched between the mask's upper edge and the first cell above it that was seen clear. Above the mask, a shaded
 sample counts only if a shaded sample of another day lies within one cell of it: the persistence the mask asks for,
 so that one bad day cannot lift the edge where the sampling leaves no other evidence. The edge lies somewhere
 between the last shaded and the first unshaded sample; where 15-minute sampling leaves a wide gap there, the
 neighbouring columns' median height is used, kept inside the gap. A column is **censored** when no unshaded sample
-lies above $h$: the obstruction may be taller than anything the sun showed.
+lies above $`h`$: the obstruction may be taller than anything the sun showed.
 
 The energy lost to shade is estimated for every step that falls in the mask, cloudy steps included:
 
-$$L(t) = b(t)\left[\min(P_{ref}, P_{AC,0}) - \min\big(P_{ref}(1-\delta_{cell}), P_{AC,0}\big)\right], \qquad P_{ref} = \bar s\,P_{cs}(t)$$
+```math
+L(t) = b(t)\left[\min(P_{ref}, P_{AC,0}) - \min\big(P_{ref}(1-\delta_{cell}), P_{AC,0}\big)\right], \qquad P_{ref} = \bar s\,P_{cs}(t)
+```
 
-$\delta_{cell} = -\mathrm{median}(r)$ is the cell's clear-sky depth, $\bar s$ the rolling median of clear-day scales
-(the plant's state of soiling), and the inverter limit $P_{AC,0}$ matters: shade on an oversized array costs nothing
-while the inverter clips. $b(t)$ is the share of the clear-sky beam that was there, because an obstruction only takes
+$`\delta_{cell} = -\mathrm{median}(r)`$ is the cell's clear-sky depth, $`\bar s`$ the rolling median of clear-day scales
+(the plant's state of soiling), and the inverter limit $`P_{AC,0}`$ matters: shade on an oversized array costs nothing
+while the inverter clips. $`b(t)`$ is the share of the clear-sky beam that was there, because an obstruction only takes
 the beam. It is read from the step's unshaded neighbours on the same day (centred window of 9 steps): with
-$k = P/P_{ref}$, a two-state sky gives $b = \mathrm{clip}\big((k - 0.3)/(1 - 0.3), 0, 1\big)$, the share of time the
+$`k = P/P_{ref}`$, a two-state sky gives $`b = \mathrm{clip}\big((k - 0.3)/(1 - 0.3), 0, 1\big)`$, the share of time the
 sun was out.
 
 **Row geometry.** When the silhouette is the row in front, it follows
-$\tan h = \tan\alpha_c\cos(\varphi - \varphi_0)$, linear in $(\tan\alpha_c\cos\varphi_0, \tan\alpha_c\sin\varphi_0)$.
-The fitted critical profile angle $\alpha_c$ and the module tilt $\beta$ give the ground coverage ratio
-$GCR = \tan\alpha_c / (\sin\beta + \tan\alpha_c\cos\beta)$.
+$`\tan h = \tan\alpha_c\cos(\varphi - \varphi_0)`$, linear in $`(\tan\alpha_c\cos\varphi_0, \tan\alpha_c\sin\varphi_0)`$.
+The fitted critical profile angle $`\alpha_c`$ and the module tilt $`\beta`$ give the ground coverage ratio
+$`GCR = \tan\alpha_c / (\sin\beta + \tan\alpha_c\cos\beta)`$.
 
 ## Validation design: a simulated system with known obstructions
 
